@@ -50,32 +50,38 @@ The motivation behind this is to learn a model for the approximate posterior $q(
 
 GANs are a way of approximating some unknown distribution, where you only need to be able to sample from the approximating distribution and take gradients of expectations through monte carlo estimates.
 
-Let's say our target distribution is $p_{\text{exact}}(y|x)$. Now suppose we have a generator model which approximates this. It takes as input a vector $x$ and outputs $p_{\text{approx}}(y|x)$. However it arrives at this in the following fashion,
+Let's say our target distribution is the predictive distribution from a Bayesin-NN, $p_{\text{exact}}(y|x)$. Now suppose we have a generator model which models this approximately. It takes as input a vector $x$ along with a set of noise-samples $\{\epsilon_i\}_{i=1}^M \sim p(\epsilon)$ and outputs $p_{\text{approx}}(y|x)$. This can be thought of as learning a prametric model $t_\theta$ for the approximate posterior,
 
 \begin{align}
 p_{\text{approx}}(y|x) &= \int p(y|x,W)q(W) dW\\
-& = \int p(y|x,t(\epsilon))p(\epsilon)d\epsilon\\
-&\approx \frac{1}{M} \sum_{m=1}^{M} p(y|x,t(\epsilon_m)), \ \epsilon \sim p(\epsilon)
+& = \int p(y|x,t_\theta(\epsilon))p(\epsilon)d\epsilon\\
+&\approx \frac{1}{M} \sum_{m=1}^{M} p(y|x,t_\theta(\epsilon_m)), \ \epsilon \sim p(\epsilon)
 \end{align}
 
-Or in short any expectation over $p_{\text{approx}}(y|x)$ can be reformulated as an expectation over $p(\epsilon)$.
+(in short any expectation over $p_{\text{approx}}(y|x)$ can be reformulated as an expectation over $p(\epsilon)$).
 
-Now suppose we have a discriminator to compare the two distributions. We can thus write our objective function as,
+Now suppose we have a discriminator $D_\psi$, to compare the two distributions, $p_{\text{approx}}$ and $p_{\text{exact}}$. We can thus write a min-max objective function as,
 
 \begin{align}
-\text{min}_t\ \text{max}_D\ \mathbb{E}[\log D(p_{\text{exact}}(y|x))] + \mathbb{E}[\log \left( 1-D(p_{\text{approx}}(y|x) \right) ]\\
+\text{min}_\theta\ \text{max}_\psi\ \mathbb{E}_{y\sim p_{\text{exact}}(y|x)}[\log D_\psi(y)] + \mathbb{E}_{y\sim p_{\text{approx}}(y|x)}[\log \left( 1-D_\psi(y) \right) ]\\
 \end{align}
 
-
-\section{Learning a parametric model MCMC proposal distribution}
-
-the ELBO for a NN model with weights W, can be written as,
+The ``desired'' second term is the following, but are they equivalent? or can we sample moments of $W$ and then integrate under some gaussian assumptions?
 
 \begin{align}
-\mathbb{E}_{q(W)}[\log p(y|x,W) -\log q(W) + \log p(W)]
+\mathbb{E}_{\epsilon\sim p_{\epsilon}}[\log \left( 1-D_\psi(f(t_\theta(\epsilon))) \right) ]\\
 \end{align}
 
+\section{Learning a parametric model MCMC transition distributions}
 
+
+In a Markov Chain MC sampler, there is a ditribution $T(W^{t}|W^{t-1})$ which captures the transitions. The stationary distribution of this chain corresponds to the required distribution for which the sampler is developed which in our case is the approximate posterior $q(W)$. 
+
+\begin{align}
+q(W^t) = \int T(W^{t}|W^{t-1})q(W^{t-1}) dW
+\end{align}
+
+Is it possible to learn a NN-model for this transition distribution? Something similar to ``Neural Adaptive Sequential Monte Carlo [Gu et. al. 2014]''
 
 % section distribution_perspective (end)
 
