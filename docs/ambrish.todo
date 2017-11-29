@@ -1,3 +1,5 @@
 repository: 
  ☐ a document for soa
  ☐ a document describing candidate ideas
+ ✔ add slack and travis integration @done (17-11-29 11:57)
+ ☐ add docker file
