@@ -1,0 +1,16 @@
+# You can validate this file at: https://lint.travis-ci.org
+
+sudo: required
+
+language: python
+
+notifications:
+  slack: hawayein:yCIZOJOSce4FQAZxaqx5wPaK
+
+services:
+  - docker
+
+#before_install:
+    #- sudo docker build -t bayesdl .
+
+#script: sudo docker run --rm --name "deepdoubt" -v $(pwd):/deepdoubt -it deepdoubt /bin/bash -c "python3 -m unittest discover src/ -p '*_unittest.py'"
