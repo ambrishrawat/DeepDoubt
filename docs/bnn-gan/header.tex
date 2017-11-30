@@ -42,15 +42,32 @@
 
 \begin{document}
 
-\lecture{Learning an approximate posterior for NNs}{}{}{November 23, 2017}
+\lecture{Learning a non-parametric approximate posterior for NNs}{}{}{November 23, 2017}
 
 \section{the GAN-way}
 
 The motivation behind this is to learn a model for the approximate posterior $q(\mathcal{W})$ of a deep neural network. The learnt model can then be utilised for sampling different weights at test-time for robust predictions.
 
-GANs are a way of approximating some unknown distribution, where you only need to be able to sample from the approximating distribution and take gradients of expectations through monte carlo estimates.
+GANs are a way of approximating some unknown target distribution, where you only need to be able to sample from the approximating distribution and take gradients of expectations through monte carlo estimates.
 
-Let's say our target distribution is the predictive distribution from a Bayesin-NN, $p_{\text{exact}}(y|x)$. Now suppose we have a generator model which models this approximately. It takes as input a vector $x$ along with a set of noise-samples $\{\epsilon_i\}_{i=1}^M \sim p(\epsilon)$ and outputs $p_{\text{approx}}(y|x)$. This can be thought of as learning a prametric model $t_\theta$ for the approximate posterior,
+Let's say the target distribution is the predictive distribution from a Bayesin-NN, $p_{\text{exact}}(y|x)$. Our aim is to define a generative process that samples from $p_{\text{approx}}(y|x)$. Suppose we have a model $t_\theta$ which defines the approximate posterior, $q(W)$, i.e. if $\{\epsilon_i\}_{i=1}^M \sim p(\epsilon)$, then \{$W_i | W_i = t_\theta(\epsilon_i)\}_{i=1}^M\sim q(W)$. Subsequently, one could obtain a sample $y_i \sim p_{\text{approx}}(y|x)$ as $f(x,t_\theta(\epsilon_i))$. 
+
+Now suppose we have a discriminator $D_\psi$, to compare the two distributions, $p_{\text{approx}}$ and $p_{\text{exact}}$. We can thus write a min-max objective function as,
+
+
+\begin{align}
+\text{min}_\theta\ \text{max}_\psi\ \mathbb{E}_{y\sim p_{\text{exact}}(y|x)}[\log D_\psi(y)] + \mathbb{E}_{y\sim p_{\text{approx}}(y|x)}[\log \left( 1-D_\psi(y) \right) ]\\
+\end{align}
+
+The ``desired'' second term needs to be reformulated in temrs of $p(\epsilon)$. In short any expectation over $p_{\text{approx}}(y|x)$ needs to be written as an expectation over $p(\epsilon)$), but are they equivalent? or can we sample moments of $W$ and then integrate under some gaussian assumptions?
+
+\begin{align}
+\mathbb{E}_{\epsilon\sim p_{\epsilon}}[\log \left( 1-D_\psi(f(t_\theta(\epsilon))) \right) ]\\
+\end{align}
+
+
+The problem is that while computing $y_i$ as $f(x,t_\theta(\epsilon_i))$, we are not marginalising over the weights. 
+% It could take as input a vector $x$ along with a set of noise-samples $\{\epsilon_i\}_{i=1}^M \sim p(\epsilon)$ and outputs samples $y \sim p_{\text{approx}}(y|x)$. This can be thought of as learning a prametric model $t_\theta$ for the approximate posterior,
 
 \begin{align}
 p_{\text{approx}}(y|x) &= \int p(y|x,W)q(W) dW\\
@@ -58,30 +75,21 @@ p_{\text{approx}}(y|x) &= \int p(y|x,W)q(W) dW\\
 &\approx \frac{1}{M} \sum_{m=1}^{M} p(y|x,t_\theta(\epsilon_m)), \ \epsilon \sim p(\epsilon)
 \end{align}
 
-(in short any expectation over $p_{\text{approx}}(y|x)$ can be reformulated as an expectation over $p(\epsilon)$).
+To make this more clear, for every $\epsilon_i$ what you get is a paired-sample $(y_i,W_i)$ from the joint distribution $p(y_i.W_i|x)$. Thus, marginalisation with respect to $W$ is a must here. Otherwise, your approximation model for posterior is a dirac on $W_i$.
 
-Now suppose we have a discriminator $D_\psi$, to compare the two distributions, $p_{\text{approx}}$ and $p_{\text{exact}}$. We can thus write a min-max objective function as,
-
-\begin{align}
-\text{min}_\theta\ \text{max}_\psi\ \mathbb{E}_{y\sim p_{\text{exact}}(y|x)}[\log D_\psi(y)] + \mathbb{E}_{y\sim p_{\text{approx}}(y|x)}[\log \left( 1-D_\psi(y) \right) ]\\
-\end{align}
-
-The ``desired'' second term is the following, but are they equivalent? or can we sample moments of $W$ and then integrate under some gaussian assumptions?
-
-\begin{align}
-\mathbb{E}_{\epsilon\sim p_{\epsilon}}[\log \left( 1-D_\psi(f(t_\theta(\epsilon))) \right) ]\\
-\end{align}
-
-\section{Learning a parametric model MCMC transition distributions}
-
+\section{Learning a parametric model for transition distributions in MCMC}
 
 In a Markov Chain MC sampler, there is a ditribution $T(W^{t}|W^{t-1})$ which captures the transitions. The stationary distribution of this chain corresponds to the required distribution for which the sampler is developed which in our case is the approximate posterior $q(W)$. 
 
 \begin{align}
-q(W^t) = \int T(W^{t}|W^{t-1})q(W^{t-1}) dW
+q(W^t) = \int T(W^{t}|W^{t-1})q(W^{t-1})dW
 \end{align}
 
 Is it possible to learn a NN-model for this transition distribution? Something similar to ``Neural Adaptive Sequential Monte Carlo [Gu et. al. 2014]''
+
+\section{Learning a Variational Autoencoder for approximate posterior}
+
+Suppose there is a parametric model which takes as input noise and outputs the mean and variance corresponding to the approximate posterior. (To be continued)
 
 % section distribution_perspective (end)
 
