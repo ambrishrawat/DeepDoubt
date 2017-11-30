@@ -95,6 +95,8 @@ q(W) &= \int q(W,z)dz\\
 &= \int \left(\prod_{j=1}^L\mathcal{N}(m_j,v_j)\right)\mathcal{N}(m_z,v_z)dz\\
 \end{align}
 
+This $q$ is tractable. (\textbf{TODO}: integrate out)
+
 \begin{align}
 \epsilon_i \sim p(\epsilon) \rightarrow \{m_{i,j},v_{i,j}\}_{j=1}^{L} = t_\theta(\epsilon_i) \rightarrow q\\
 \end{align}
@@ -108,6 +110,14 @@ This idea attempts to learm a latent space of the approximate posterior. I will 
 \begin{align}
 \epsilon_i \sim p(\epsilon) \rightarrow W_i = t_\theta(\epsilon_i)\\
 m,v \rightarrow z_i \sim \mathcal{N}(m,v) \rightarrow W_i = t_\theta(z_i)
+\end{align}
+
+The previious approach tried to factor $q$ conditioned on $z$. Instead, one can assume a non-parametric distribution for $q(W|z)$. So alternatively,
+
+
+\begin{align}
+q(W) &= \int q(W,z)dz\\
+&= \int q(W|z)p(z)dz\\
 \end{align}
 
 \begin{itemize}
