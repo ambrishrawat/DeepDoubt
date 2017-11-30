@@ -77,6 +77,46 @@ p_{\text{approx}}(y|x) &= \int p(y|x,W)q(W) dW\\
 
 To make this more clear, for every $\epsilon_i$ what you get is a paired-sample $(y_i,W_i)$ from the joint distribution $p(y_i.W_i|x)$. Thus, marginalisation with respect to $W$ is a must here. Otherwise, your approximation model for posterior is a dirac on $W_i$.
 
+
+\section{the VAE-way - I}
+
+Suppose there is a parametric model $g_\theta$ which takes as input noise and outputs the mean and variance corresponding to the approximate posterior. Now if you make the same assumption as PBP, that the output of the network admit a Gaussian distribution then you can sucessfully represent a sample from the distribution $p(y|x)$. One can then learn this model using either the ELBO, or the GAN-way.
+
+Assumtions: It is assumed that the approximate posterior factors over weight, conditioned on the latent space, which is more complex then a naively factored distribution of weights. 
+
+\begin{align}
+q(W) = \prod_{j=1}^Lq(W_j) = \prod_{j=1}^L \mathcal{N}(m_j,v_j)
+\end{align}
+
+\begin{align}
+q(W) &= \int q(W,z)dz\\
+&= \int q(W|z)p(z)dz\\
+&= \int \left(\prod_{j=1}^Lq(W_j|z)\right)p(z)dz\\
+&= \int \left(\prod_{j=1}^L\mathcal{N}(m_j,v_j)\right)\mathcal{N}(m_z,v_z)dz\\
+\end{align}
+
+\begin{align}
+\epsilon_i \sim p(\epsilon) \rightarrow \{m_{i,j},v_{i,j}\}_{j=1}^{L} = t_\theta(\epsilon_i) \rightarrow q\\
+\end{align}
+
+Limitations: 1. the approximate posterior in this model is not as expressive as hypernetworks'. 2. This wouldn't scale to high dimensional datasets if you make such big assumptions like normally distributed outputs. 
+
+\section{the VAE-way - II}
+
+This idea attempts to learm a latent space of the approximate posterior. I will discuss how this differs from Hypernetworks and what's the advantage of this modelling. The merits are clear if you see the generative process for getting samples of $q(W)$ differs in the two approaches. 
+
+\begin{align}
+\epsilon_i \sim p(\epsilon) \rightarrow W_i = t_\theta(\epsilon_i)\\
+m,v \rightarrow z_i \sim \mathcal{N}(m,v) \rightarrow W_i = t_\theta(z_i)
+\end{align}
+
+\begin{itemize}
+  \item Is this equivalent to putting hierarchical priors in the Hypernetwork formulation? 
+\end{itemize}
+
+Both the formilations I and II can be interpretted as learning a latent space for approximate posterior. 
+
+ 
 \section{Learning a parametric model for transition distributions in MCMC}
 
 In a Markov Chain MC sampler, there is a ditribution $T(W^{t}|W^{t-1})$ which captures the transitions. The stationary distribution of this chain corresponds to the required distribution for which the sampler is developed which in our case is the approximate posterior $q(W)$. 
@@ -87,9 +127,6 @@ q(W^t) = \int T(W^{t}|W^{t-1})q(W^{t-1})dW
 
 Is it possible to learn a NN-model for this transition distribution? Something similar to ``Neural Adaptive Sequential Monte Carlo [Gu et. al. 2014]''
 
-\section{Learning a Variational Autoencoder for approximate posterior}
-
-Suppose there is a parametric model which takes as input noise and outputs the mean and variance corresponding to the approximate posterior. (To be continued)
 
 % section distribution_perspective (end)
 
