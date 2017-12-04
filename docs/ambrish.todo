@@ -1,5 +1,5 @@
 repository: 
- ☐ a document for soa
- ☐ a document describing candidate ideas
+ ✔ a document for soa @done (17-11-30 08:48)
+ ✔ a document describing candidate ideas @done (17-11-30 08:48)
  ✔ add slack and travis integration @done (17-11-29 11:57)
  ☐ add docker file
