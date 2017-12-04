@@ -79,12 +79,9 @@ Assuming: $y = f(x,W), x \sim p(x) \iff y \sim p(y|x)$, we can write this as \fo
 Now of course, we would need gradients of this objective function with respect to $W$ for learning $f$. 
 
 \paragraph{Learning with posterior. }
-Now if a posterior is learnt over these weights, $q(W)$, one can succesfully obtain the required samples in Equaion~\eqref{eq:gan-obj}. This is under the folllowing assumption $y = f(x,W), W \sim q(W) \iff y \sim p(y|x)$. \footnote{Is this consistent with $p_{\text{model}}(y|x) = \int p(y|x,W)q(W) dW$?}. During training, we need gradients of the form, $\frac{\partial}{\partial W} \mathbb{E}_{W\sim q(W)}[D_\psi(f(x,W))]$. Using the reparametrisation trick, we can compute these as, $\mathbb{E}_{\epsilon \sim p(\epsilon)}\left[\frac{\partial}{\partial W} D_\psi(f(x,t_W(\epsilon)))\right]$
+Now if a posterior is learnt over these weights, $q(W)$, one can succesfully obtain the required samples in Equaion~\eqref{eq:gan-obj}. This is under the folllowing assumption $y = f(x,W), W \sim q(W) \iff y \sim p(y|x)$. \footnote{Is this consistent with $p_{\text{model}}(y|x) = \int p(y|x,W)q(W) dW$?}. During training, we need gradients of the form, $\frac{\partial}{\partial W} \mathbb{E}_{W\sim q(W)}[D_\psi(f(x,W))]$. Using the reparametrisation trick, we can compute these as, $\mathbb{E}_{\epsilon \sim p(\epsilon)}\left[\frac{\partial}{\partial W} D_\psi(f(x,t_W(\epsilon)))\right]$. \footnote{For any function $h$, is this true? (I am struggling to see the equivalence between the first two terms) - $\mathbb{E}_{y\sim p_{\text{model}}(y|x)}[h(y)] = \mathbb{E}_{W\sim q(W)}[h(f(x,W))] = \mathbb{E}_{\epsilon\sim p_{\epsilon}}[h(f(x,t_\theta(\epsilon)))]$}
 
-Suppose we have a model $t_\theta$ which defines the approximate posterior, $q(W)$, i.e. if $\{\epsilon_i\}_{i=1}^M \sim p(\epsilon)$, then \{$W_i | W_i = t_\theta(\epsilon_i)\}_{i=1}^M\sim q(W)$. Subsequently, one could obtain a sample $y_i \sim p_{\text{approx}}(y|x)$ as $f(x,t_\theta(\epsilon_i))$.
-
-
-\footnote{For any function $h$, is this true? (I am struggling to see the equivalence between the first two terms) - $\mathbb{E}_{y\sim p_{\text{model}}(y|x)}[h(y)] = \mathbb{E}_{W\sim q(W)}[h(f(x,W))] = \mathbb{E}_{\epsilon\sim p_{\epsilon}}[h(f(x,t_\theta(\epsilon)))]$}
+Suppose we have a model $t_\theta$ which defines the approximate posterior, $q(W)$, i.e. if $\{\epsilon_i\}_{i=1}^M \sim p(\epsilon)$, then \{$W_i | W_i = t_\theta(\epsilon_i)\}_{i=1}^M\sim q(W)$. Subsequently, one could obtain a sample $y_i \sim p_{\text{approx}}(y|x)$ as $f(x,t_\theta(\epsilon_i))$. 
 
 
 The ``desired'' second term needs to be reformulated in temrs of $p(\epsilon)$. In short any expectation over $p_{\text{approx}}(y|x)$ needs to be written as an expectation over $p(\epsilon)$), but are they equivalent? or can we sample moments of $W$ and then integrate under some gaussian assumptions?
