@@ -42,22 +42,50 @@
 
 \begin{document}
 
-\lecture{Learning a non-parametric approximate posterior for NNs}{}{}{November 23, 2017}
+\lecture{Learning a implicit approximate posterior for NNs}{}{}{November 23, 2017}
 
-\section{the GAN-way}
+The motivation here is to learn a model for the approximate posterior $q(\mathcal{W})$ of a deep neural network. The learnt model can then be utilised for well caliberated predictions with uncertainty estimates. There are various approaches to get a feedback for learning in a machine learning model - cost function, marginal likelihood or its lower bound (ELBO), or divergence measures between two distributions (GANs and the related family of models). 
 
-The motivation behind this is to learn a model for the approximate posterior $q(\mathcal{W})$ of a deep neural network. The learnt model can then be utilised for sampling different weights at test-time for robust predictions.
+Let's say the task is to model $p(y|x)$ which is modelled through a deterministic (continous, differentiable), function $f_\theta$ (often a Neural Network). For regression $p(y|x)$ is modelled as a Gaussian, $\mathcal{N}(f_\theta(x),\gamma^{-1})$. Similarly, for classification, $p(y|x)$ is modelled as a categorical distribution which is realised through a softmax operation on the outputs of the last layer. The densities for $p(y|x)$ can be evaluated accordingly.
 
-GANs are a way of approximating some unknown target distribution, where you only need to be able to sample from the approximating distribution and take gradients of expectations through monte carlo estimates.
+\paragraph{Other Tasks}
+Even unsupervised tasks can be modelled this way or latent variable models like Matrix factorisation or generative models. All these tasks can be visualised as a task-layer. The objective of our modelling will be to perform these tasks probabilistically. 
 
-Let's say the target distribution is the predictive distribution from a Bayesin-NN, $p_{\text{exact}}(y|x)$. Our aim is to define a generative process that samples from $p_{\text{approx}}(y|x)$. Suppose we have a model $t_\theta$ which defines the approximate posterior, $q(W)$, i.e. if $\{\epsilon_i\}_{i=1}^M \sim p(\epsilon)$, then \{$W_i | W_i = t_\theta(\epsilon_i)\}_{i=1}^M\sim q(W)$. Subsequently, one could obtain a sample $y_i \sim p_{\text{approx}}(y|x)$ as $f(x,t_\theta(\epsilon_i))$. 
+\section{Adversarial Learning}
 
-Now suppose we have a discriminator $D_\psi$, to compare the two distributions, $p_{\text{approx}}$ and $p_{\text{exact}}$. We can thus write a min-max objective function as,
-
+GANs are a way of approximating some unknown target distribution, where you only need to be able to sample from the approximating distribution and take gradients of expectations through monte carlo estimates. The central game-theoretic idea behind GANs is the objective function which in its generality can be summarised as,
 
 \begin{align}
-\text{min}_\theta\ \text{max}_\psi\ \mathbb{E}_{y\sim p_{\text{exact}}(y|x)}[\log D_\psi(y)] + \mathbb{E}_{y\sim p_{\text{approx}}(y|x)}[\log \left( 1-D_\psi(y) \right) ]\\
+\mathbb{E}_{y\sim p_{\text{data}}}[\log D(y)] + \mathbb{E}_{y\sim p_{\text{model}}}[\log\left(1-D(y)\right)]
+\label{eq:gan-obj}
 \end{align}
+
+This formulation can effectively substitute for most loss function in machine learning modelling. The supervised learning tasks of classification and regression model $p(y|x)$ and thus one could learn the models using GAN-objective function as loss instead of \textit{cross-entropy} or \textit{mean-squared loss}. \footnote{It is effectively JSD as opposed to KL diveregnce minimisation between the two distributions. Add to that, the JSD is adversarilly learnt by simultaneously learning a discriminator.} It is important to note that in these formulations, the game might be highly imbalanced between the discrimnator process and the generator process. 
+
+
+\paragraph{Learning without posterior (something is wrong here). }
+Let's say the target distribution is $p_{\text{data}}(y|x)$. Our aim is to define a generative process that samples from $p_{\text{model}}(y|x)$ which could be obtained as say, the predictive distribution of a Stochastic Neural Network. Bayesian Neural Networks are one way to model stochastic nets. Suppose the task of classification/regression is modelled as a functional transform $y=f(x,W)$. Now suppose we have a discriminator $D_\psi$, to compare the samples from two distributions, $p_{\text{model}}$ and $p_{\text{data}}$. We can thus write a min-max objective function as,
+
+\begin{align}
+\text{min}_\theta\ \text{max}_\psi\ \mathbb{E}_{y\sim p_{\text{data}}(y|x)}[\log D_\psi(y)] + \mathbb{E}_{y\sim p_{\text{model}}(y|x)}[\log \left( 1-D_\psi(y) \right) ]\\
+\end{align}
+
+Assuming: $y = f(x,W), x \sim p(x) \iff y \sim p(y|x)$, we can write this as \footnote{Really not sure of this assumption! Even if it is true, how do you compute these gradients $\frac{\partial}{\partial W} \mathbb{E}_{x\sim p(x)}[h(f(x,W))]$}?,
+
+\begin{align}
+\text{min}_\theta\ \text{max}_\psi\ \mathbb{E}_{y\sim p_{\text{data}}(y|x)}[\log D_\psi(y)] + \mathbb{E}_{x\sim p(x)}[\log \left( 1-D_\psi(f(x,W)) \right) ]\\
+\end{align}
+
+Now of course, we would need gradients of this objective function with respect to $W$ for learning $f$. 
+
+\paragraph{Learning with posterior. }
+Now if a posterior is learnt over these weights, $q(W)$, one can succesfully obtain the required samples in Equaion~\eqref{eq:gan-obj}. This is under the folllowing assumption $y = f(x,W), W \sim q(W) \iff y \sim p(y|x)$. \footnote{Is this consistent with $p_{\text{model}}(y|x) = \int p(y|x,W)q(W) dW$?}. During training, we need gradients of the form, $\frac{\partial}{\partial W} \mathbb{E}_{W\sim q(W)}[D_\psi(f(x,W))]$. Using the reparametrisation trick, we can compute these as, $\mathbb{E}_{\epsilon \sim p(\epsilon)}\left[\frac{\partial}{\partial W} D_\psi(f(x,t_W(\epsilon)))\right]$
+
+Suppose we have a model $t_\theta$ which defines the approximate posterior, $q(W)$, i.e. if $\{\epsilon_i\}_{i=1}^M \sim p(\epsilon)$, then \{$W_i | W_i = t_\theta(\epsilon_i)\}_{i=1}^M\sim q(W)$. Subsequently, one could obtain a sample $y_i \sim p_{\text{approx}}(y|x)$ as $f(x,t_\theta(\epsilon_i))$.
+
+
+\footnote{For any function $h$, is this true? (I am struggling to see the equivalence between the first two terms) - $\mathbb{E}_{y\sim p_{\text{model}}(y|x)}[h(y)] = \mathbb{E}_{W\sim q(W)}[h(f(x,W))] = \mathbb{E}_{\epsilon\sim p_{\epsilon}}[h(f(x,t_\theta(\epsilon)))]$}
+
 
 The ``desired'' second term needs to be reformulated in temrs of $p(\epsilon)$. In short any expectation over $p_{\text{approx}}(y|x)$ needs to be written as an expectation over $p(\epsilon)$), but are they equivalent? or can we sample moments of $W$ and then integrate under some gaussian assumptions?
 
@@ -78,7 +106,7 @@ p_{\text{approx}}(y|x) &= \int p(y|x,W)q(W) dW\\
 To make this more clear, for every $\epsilon_i$ what you get is a paired-sample $(y_i,W_i)$ from the joint distribution $p(y_i.W_i|x)$. Thus, marginalisation with respect to $W$ is a must here. Otherwise, your approximation model for posterior is a dirac on $W_i$.
 
 
-\section{the VAE-way - I}
+\section{ELBO - I}
 
 Suppose there is a parametric model $g_\theta$ which takes as input noise and outputs the mean and variance corresponding to the approximate posterior. Now if you make the same assumption as PBP, that the output of the network admit a Gaussian distribution then you can sucessfully represent a sample from the distribution $p(y|x)$. One can then learn this model using either the ELBO, or the GAN-way.
 
@@ -103,7 +131,7 @@ This $q$ is tractable. (\textbf{TODO}: integrate out)
 
 Limitations: 1. the approximate posterior in this model is not as expressive as hypernetworks'. 2. This wouldn't scale to high dimensional datasets if you make such big assumptions like normally distributed outputs. 
 
-\section{the VAE-way - II}
+\section{ELBO - II}
 
 This idea attempts to learm a latent space of the approximate posterior. I will discuss how this differs from Hypernetworks and what's the advantage of this modelling. The merits are clear if you see the generative process for getting samples of $q(W)$ differs in the two approaches. 
 
