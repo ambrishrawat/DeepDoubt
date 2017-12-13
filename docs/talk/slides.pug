@@ -1,0 +1,303 @@
+extends layout.pug
+
+mixin ref(name, href)
+  span.cite
+    | [
+    a(href=href)= name
+    | ]
+mixin sref(name, href)
+  |  
+  +ref(name, href)
+mixin refs(name, href)
+  +ref(name, href)
+  |  
+mixin srefs(name, href)
+  |  
+  +ref(name, href)
+  |  
+
+block title
+  title St Etienne talk
+
+block slides
+  section(data-transition="none")
+    h1 Generative Modelling with Empirical Distributions
+    p Ambrish Rawat, Mathieu Sinn
+    p IBM Research Dublin
+  section(data-transition="none")
+    h3 Why do we care about Generative Modelling?
+    ul
+      li.fragment It resonates with the "create to understand" school of thought
+      figure.fragment
+        img.plain(src="img/physics.jpg" align="centre" width="50%", border="None")
+        img.plain(src="img/LDA.png" align="centre" width="50%", border="None")
+      li.fragment Wide range of applications have benefited from it 
+
+      p
+        span.fragment ... Speech Synthesis, Topic Modelling, Population Genetics ...
+
+  
+  section(data-transition="none")
+    h3 How do we approach it?
+    p.fragment Let's take an example
+      figure.fragment
+        img.plain(src="img/gm1.jpg" align="centre" width="40%", border="None")
+    div(style="width: 100%; position: absolute; left: 0").
+      \begin{align}
+      
+      \end{align}
+
+  section(data-transition="none") 
+    h3 How do we approach it?
+    p Let's take an example
+      figure
+        img.plain(src="img/gm2.jpg" align="centre" width="40%", border="None")
+    
+    div(style="width: 100%; position: absolute; left: 0").
+      \begin{align}
+        z_n &\sim \text{Multinomial}(z_n|\pi)
+      \end{align}
+
+  section(data-transition="none") 
+    h3 How do we approach it?
+    p Let's take an example
+      figure
+        img.plain(src="img/gm3.jpg" align="centre" width="40%", border="None")
+    div(style="width: 100%; position: absolute; left: 0").
+      \begin{align}
+        z_n &\sim \text{Multinomial}(z_n|\pi)\\
+        x_n &\sim \mathcal{N}(\mu_k,\Sigma_k)
+      \end{align}    
+  
+  section(data-transition="none") 
+    h3 How do we approach it?
+    p Let's take an example
+      figure
+        img.plain(src="img/gm3.jpg" align="centre" width="40%", border="None")
+    div(style="width: 100%; position: absolute; left: 0").
+      \begin{align}
+        z_n &\sim \text{Multinomial}(z_n|\pi)\\
+        x_n &\sim \mathcal{N}(\mu_k,\Sigma_k)
+      \end{align}
+      Maximise the log likelihood with respect to observations 
+
+  section(data-transition="none") 
+    h3 How do we evaluate our model?
+    p 
+      strong Strategy 1: 
+      | Try to explain some held out data
+      figure
+        img.plain(src="img/gm4.jpg" align="centre" width="40%", border="None")
+    p.fragment ...compute log likelihood of test set...
+
+  section(data-transition="none") 
+    h3 How do we evaluate our model?
+    p 
+      strong Strategy 2: 
+      | Generate samples and compare them
+      figure
+        img.plain(src="img/gm5.jpg" align="centre" width="40%", border="None")
+    p.fragment ...some way to measure similarity between points...
+
+  section(data-transition="none") 
+    h3 How do we evaluate our model?
+    p 
+      strong Strategy 2: 
+      | Generate samples and compare them
+      figure
+        img.plain(src="img/gm6.jpg" align="centre" width="40%", border="None")
+    p 
+      strong Do we really need an explicit distribution for comparison?
+
+  section(data-transition="none") 
+    p 
+      | ... leads us to 
+      strong Implicit Models
+
+  section(data-transition="none") 
+    h3 What are Implicit Models?
+    figure
+      img.plain(src="img/gm6.jpg" align="left" width="40%", border="None")
+
+
+    div(style="width: 30%; position: absolute; left: 65%")
+      p $X_{data} \sim P_X$
+      p.fragment(data-fragment-index=2) $z \sim P_Z, g_{\theta}(z) $
+      p.fragment(data-fragment-index=3) $X_{gen} \sim P^{(g)}$
+      p.fragment(data-fragment-index=4) Compare: $X_{gen},X_{data}$
+      
+  section(data-transition="none") 
+    h3 The case of Implicit Models
+    ul
+      li.fragment How do we learn them?
+        ul
+          li.fragment No analytical distribution, so no likelihood
+          li.fragment Where do we get the learning signal from?
+      li.fragment How do we evaluate them?
+        ul
+          li.fragment Only samples available
+          li.fragment Generate similar samples but not the exact same
+      li.fragment Tons of applications
+        ul
+          li.fragment ..image completion, super resolution, video-frame prediction, texture synthesis ... 
+    p.fragment
+      | Popular paradigm: 
+      strong GANs, VAEs!
+
+  section(data-transition="none") 
+    h3 How do we learn Implicit Models?
+    figure
+      img.plain(src="img/gm6.jpg" align="left" width="40%", border="None")
+
+
+    div(style="width: 30%; position: absolute; left: 65%")
+      p $X_{data}, z\sim P_Z,$
+      p and $g_{\theta}(z)$
+      p.fragment(data-fragment-index=2) Moment Matching?
+      p.fragment(data-fragment-index=3) Density Difference?
+      p.fragment(data-fragment-index=3) Density Ratio?
+
+  section(data-transition="none") 
+    h3 What's the MMD approach?
+    figure
+      img.plain(src="img/gm6.jpg" align="left" width="40%", border="None")
+
+    div(style="width: 30%; position: absolute; left: 65%")
+      p $X_{data}, z\sim P_Z,$
+      p and $g_{\theta}(z)$
+      p.fragment(data-fragment-index=2) Two Sample Test
+      p.fragment(data-fragment-index=3) ${K_\text{MMD}}(X_{data},X_{gen})$
+      p.fragment(data-fragment-index=3) minimise ${K_\text{MMD}}$
+  
+  section(data-transition="none") 
+    h3 What's the GAN approach?
+    figure
+      img.plain(src="img/gm6.jpg" align="left" width="40%", border="None")
+
+    div(style="width: 30%; position: absolute; left: 65%")
+      p $X_{data}, z\sim P_Z,$
+      p and $g_{\theta}(z)$
+      p.fragment(data-fragment-index=2) Learn the comparison function as well
+      p.fragment(data-fragment-index=3)
+        strong ...discriminator... ($d$)
+      
+  
+
+  section(data-transition="none") 
+    h3 What are the challenges in the GAN approach?
+    p.fragment $V(d,g) := \mathbb{E}\big[\log(d(X))\big]+ \mathbb{E}\big[\log(1-d(g(Z))) \big]$
+    ul
+      li.fragment It has a min-max objective (not optimisation friendly)
+      li.fragment No principed way to train
+      li.fragment No guarantee of learning a distribution (reproduce training data?)
+      li.fragment An optimal discriminator could yield vanishing gradients
+    p.fragment $d^\ast(x) = \frac{p(x)}{p(x) + p^{(g)}(x)}$
+
+  section(data-transition="none") 
+    h3 ...a closer look at optimal $d$
+    p $d^\ast(x) = \frac{p(x)}{p(x) + p^{(g)}(x)}$
+
+  section(data-transition="none") 
+    h3 ...the emprirical case of optimal $d$
+    p $d_n^\ast(x) = \frac{\sum_{i=1}^n \mathbb{I}(X_i=x) }{ \sum_{i=1}^n \mathbb{I}(X_i=x) + \sum_{i=1}^n \mathbb{I}(g(Z_i)=x) }$
+
+  section(data-transition="none") 
+    h3 ...the smoothed emprirical case of optimal $d$
+    p $d_n^\ast(x) = \frac{ \sum_{i=1}^n p^{(\epsilon)}(x-X_i)}{\sum_{i=1}^n p^{(\epsilon)}(x-X_i) +  \sum_{i=1}^n p^{(\epsilon)}(x-g(Z_i))}$
+
+  section(data-transition="none") 
+    h3 So what can we do with this?
+    div(style="width: 100%; position: absolute; left: 0").
+      \begin{align}
+        \hat{p}_{n,\sigma}(x) &:= \frac{1}{\sigma^k n} \sum_{i=1}^n  K\left(\frac{x-X_i}{\sigma}\right)\\
+        \hat{p}_{n,\sigma}^{(\theta)}(x) &:= \frac{1}{\sigma^k n} \sum_{i=1}^n   K\left(\frac{x-g_\theta(Z_i)}{\sigma}\right)      
+      \end{align}
+
+
+      with $K = p^{(\epsilon)}$ we get the a kernel estimate of the density ratio
+
+  section(data-transition="none") 
+    h3 Our proposed objective function
+
+    div(style="width: 100%; position: absolute; left: 0").
+      \begin{align}
+        K_n(\theta, \sigma, \varphi) &:= \frac{1}{n} \sum_{i=1}^n \log \frac{\hat{p}_{n,\sigma}(X_i)\,+\, \varphi}{\hat{p}_{n,\sigma}(X_i) \,+\, \hat{p}_{n,\sigma}^{(\theta)}(X_i)\,+\,2 \varphi}\\
+        + & \frac{1}{n} \sum_{i=1}^n \log \frac{\hat{p}_{n,\sigma}^{(\theta)}(g_\theta(Z_i))\,+\, \varphi}{\hat{p}_{n,\sigma}(g_\theta(Z_i))\,+\, \hat{p}_{n,\sigma}^{(\theta)}(g_\theta(Z_i))\,+\,2 \varphi}\\
+      \end{align}
+
+      ...some desirable assymptotic properties...
+
+  section(data-transition="none")
+    h3 A toy example
+    figure
+      img.plain(src="img/unrolled1.png" align="centre" width="100%", border="None")
+
+  section(data-transition="none")
+    h3 Not very exciting, but this can generate digits!
+    figure
+      img.plain(src="img/mnist.png" align="centre" width="60%", border="None")
+
+  section(data-transition="none")
+    h3 How do we scale this to coloured images?
+
+  section(data-transition="none")
+    h3 How do we scale this to coloured images?
+    div(style="width: 100%; position: absolute; left: 0").
+      \begin{align}
+        \hat{p}_{n,\sigma}^{(\psi)}(x) \,&:=\, \frac{1}{n} \sum_{i=1}^n  K\left(\frac{f_\psi(x)-f_\psi(X_i)}{\sigma}\right)\\
+        \hat{p}_{n,\sigma}^{(\theta,\psi)}(x) \,&:=\, \frac{1}{n} \sum_{i=1}^n   K\left(\frac{f_\psi(x)-f_\psi(g_\theta(Z_i))}{\sigma}\right)\\
+      \end{align}
+      $\text{min}_\theta\text{max}_\psi K_n(\psi,\theta, \sigma, \varphi)$
+
+  section(data-transition="none")
+    h3 Sheets of CIFAR and CelebA
+    figure
+      img.plain(src="img/colour.png" align="centre" width="80%", border="None")
+
+  section(data-transition="none") 
+    h3 How do we evaluate Implicit Models?
+    ul
+      li.fragment How does a classifier perceive the generative images?
+    figure.fragment
+      img.plain(src="img/evaluate.png" align="centre" width="60%", border="None")
+    
+    p.fragment ...expected entropy, inception score, distance from training set...
+
+  section(data-transition="none") 
+    h3 What's cooking in the latent space?
+    figure.fragment
+      img.plain(src="img/latent1.png" align="centre" width="60%", border="None")
+  
+  section(data-transition="none") 
+    h3 What's cooking in the latent space?
+    figure
+      img.plain(src="img/latent12.png" align="centre" width="60%", border="None")
+  
+  section(data-transition="none") 
+    h3 What's cooking in the latent space?
+    figure
+      img.plain(src="img/latent2.png" align="centre" width="60%", border="None")
+
+  section(data-transition="none") 
+    h3 What's cooking in the latent space?
+    figure
+      img.plain(src="img/latent3.png" align="centre" width="60%", border="None")
+
+  section(data-transition="none")
+    h3  ... remaining challenges
+    ul
+      li With introduction of $f_{\psi}$ we are back to square one for balacing discriminator and generator training.
+      li (the good old one) How to choose the right kernel?
+      li What is the effect of the regulariser ($\varphi$)?
+      li Can we make use of any dynamics in the latent space for useful generation?
+      li ...
+    a.fragment(href="https://arxiv.org/abs/1705.09199") Non-parametric estimation of Jensen-Shannon Divergence in Generative Adversrial Network Training (arxiv:1705.09199)
+
+  section(data-transition="none")
+    h3  ...other ongoing research at IBM
+    ul
+      li Bayesian Deep Learning
+      li Adversarial ML and Security of AI
+      li Open World Visual Recognition
+    figure
+      img.plain(src="img/team.png" align="centre" width="60%", border="None")
