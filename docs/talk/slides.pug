@@ -26,22 +26,44 @@ block slides
     p IBM Research Dublin
 
   section(data-transition="none")
-    h3 What we don't know?
-    
-  
-  section(data-transition="none")
-    h3 What we don't know about what we don't know?
+    h3 Knowing what we don't know?
+    ul
+      li Do we know...
+      ul
+        li what the temperature will be this evening?
+        li what's the expected rating of Star Wars?
+      li Prediction models assist in knowing-what-we-don't-know
+      figure
+        img.plain(src="img/line.png" align="left" width="100%", border="None")
 
+  section(data-transition="none")
+    h3 Knowing 
+      strong what we don't know 
+      | about what we don't know?
+    ul
+      li Do we know...
+      ul
+        li the uncertainty in our prediction for the temperature will be this evening?
+        li the uncertainty in our prediction for the expected rating of Star Wars?
+      li Prediction models assist in knowing-what-we-don't-know
+      figure
+        img.plain(src="img/regression-uncertainty.png" width="60%", border="None")
 
   section(data-transition="none") 
     h3 Uncertainty in classification
+    ul
+      li This uncertainty is not readily available for classification
+    figure
+        img.plain(src="img/simplex.png" width="50%", border="None")
 
 
   section(data-transition="none") 
-    h3 Neural Networks for classification
+    h3 Bayesian approaches to Neural Networks
+    ul
+      li Capture parameter uncertinty $p(W|D)$
+      li Propagate parameter uncertainty to predictions $p(y^\ast|x^\ast,D) = \int p(y^\ast|x^\ast,W)p(W|D)dW$
   
   
-  section(data-transition="none") 
-    h3 Bayesian Neural Networks
+
 
 
